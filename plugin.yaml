@@ -4,8 +4,7 @@ display-name: aws-glue-s3-plugin
 picture: plugin.png
 category: backend # Ref: https://docs.stackspot.com/latest/docs/creators-guide/yaml/#category
 compatibility:
-  - java
-  - spring
+  - Terraform
 about: docs/about.md
 usage: docs/usage.md
 use-case: docs/use-case.md
@@ -15,17 +14,32 @@ technologies: # Ref: https://docs.stackspot.com/latest/docs/creators-guide/yaml/
 types:
   - env
 inputs:
-  - label: Input Example
+  - label: Criar buckets padrão(data-sor, data-sot, data-spec, data-script e data-athena-output) ou criar um bucket individual?
     type: text
-    name: example
-    default: any text
-  - label: Example of number
-    type: int
-    name: any_number
-    default: "10"
-  - label: Example of list
-    type: multiselect
-    name: any_list
     items:
-      - item1
-      - item2
+      - Padrão
+      - Individual
+    name: creation_decision
+
+  - label: digite o nome do bucket
+    type: text
+    name: bucket_name
+    condition:
+      variable: creation_decision
+      operator: "=="
+      value: Individual
+
+hooks:
+  - type: edit
+    trigger: after-render
+    path: bucket.tf
+    condition:
+      variable: creation_decision
+      operator: "=="
+      value: Individual
+    changes:
+      - insert:
+          line: -1
+          snippet: snippets/snippet-bucket.tf
+          when:
+            not-exists: snippets/snippet-bucket.tf
